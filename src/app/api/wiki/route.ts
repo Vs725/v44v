@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Query and papers required" }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
@@ -39,20 +39,21 @@ Rules:
 - Do not start with "Based on" or "According to"`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-          },
-        }),
-      }
-    );
+  const response = await fetch(
+  "https://api.groq.com/openai/v1/chat/completions",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.1-8b-instant",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 500,
+    }),
+  }
+);
 
     if (!response.ok) {
       const err = await response.json();
@@ -60,7 +61,7 @@ Rules:
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = data.choices?.[0]?.message?.content || ""; 
 
     return NextResponse.json({ wiki: text });
   } catch (error: any) {
