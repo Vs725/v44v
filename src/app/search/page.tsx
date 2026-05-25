@@ -5,8 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, ArrowLeft, ExternalLink, Users,
-  Calendar, BookOpen, Quote, Tag, Loader2,
-  ChevronLeft, ChevronRight, Lock, Unlock
+  Calendar, BookOpen, Quote, Loader2,
+  ChevronLeft, ChevronRight, Lock, Unlock,
+  Sparkles, MessageCircle
 } from "lucide-react";
 
 interface Paper {
@@ -34,6 +35,11 @@ function SearchResults() {
   const [searchInput, setSearchInput] = useState(query);
   const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
 
+  // Wiki state
+  const [wiki, setWiki] = useState("");
+  const [wikiLoading, setWikiLoading] = useState(false);
+  const [wikiError, setWikiError] = useState("");
+
   useEffect(() => {
     if (!query) return;
     fetchPapers(query, 1);
@@ -42,6 +48,8 @@ function SearchResults() {
   const fetchPapers = async (q: string, p: number) => {
     setLoading(true);
     setError("");
+    setWiki("");
+    setWikiError("");
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&page=${p}`);
       const data = await res.json();
@@ -50,10 +58,33 @@ function SearchResults() {
       setTotal(data.total);
       setPage(p);
       setSelectedPaper(data.results[0] || null);
+      // Generate wiki from results
+      if (data.results.length > 0) {
+        generateWiki(q, data.results);
+      }
     } catch (e) {
       setError("Search failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateWiki = async (q: string, results: Paper[]) => {
+    setWikiLoading(true);
+    setWikiError("");
+    try {
+      const res = await fetch("/api/wiki", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q, papers: results }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setWiki(data.wiki);
+    } catch (e: any) {
+      setWikiError("Wiki generation unavailable.");
+    } finally {
+      setWikiLoading(false);
     }
   };
 
@@ -72,8 +103,6 @@ function SearchResults() {
       {/* ── Top bar ── */}
       <div className="sticky top-0 z-20 bg-[#080810]/90 backdrop-blur-md border-b border-white/[0.05] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center gap-4">
-
-          {/* Logo back */}
           <a href="/" className="flex items-center gap-2 shrink-0 group">
             <div className="w-7 h-7 rounded-lg bg-[#6C63FF] flex items-center justify-center">
               <span className="text-white font-bold text-xs">V4</span>
@@ -81,7 +110,6 @@ function SearchResults() {
             <ArrowLeft className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
           </a>
 
-          {/* Search bar */}
           <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
             <div className="relative flex items-center bg-[#0f0f1a] border border-white/10 focus-within:border-[#6C63FF]/50 rounded-xl px-4 py-2.5 transition-all">
               <Search className="w-4 h-4 text-white/30 mr-3 shrink-0" />
@@ -101,7 +129,6 @@ function SearchResults() {
             </div>
           </form>
 
-          {/* Result count */}
           {!loading && total > 0 && (
             <div className="text-white/30 text-sm shrink-0">
               {total.toLocaleString()} results
@@ -110,13 +137,13 @@ function SearchResults() {
         </div>
       </div>
 
-      {/* ── Main layout ── */}
+      {/* ── Main ── */}
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Query heading */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-white mb-1"
-            style={{ fontFamily: "Georgia, serif" }}
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
           >
             Results for{" "}
             <span className="text-transparent bg-clip-text"
@@ -144,20 +171,17 @@ function SearchResults() {
         {error && (
           <div className="text-center py-32">
             <p className="text-red-400 mb-4">{error}</p>
-            <button
-              onClick={() => fetchPapers(query, 1)}
-              className="text-[#6C63FF] hover:underline text-sm"
-            >
+            <button onClick={() => fetchPapers(query, 1)} className="text-[#6C63FF] hover:underline text-sm">
               Try again
             </button>
           </div>
         )}
 
-        {/* Results grid */}
+        {/* Results */}
         {!loading && !error && papers.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
 
-            {/* ── Left: Paper list ── */}
+            {/* ── Left: Papers ── */}
             <div className="space-y-4">
               <AnimatePresence mode="wait">
                 {papers.map((paper, i) => (
@@ -173,7 +197,6 @@ function SearchResults() {
                         : "bg-[#0a0a12] border-white/[0.05] hover:border-white/15"
                     }`}
                   >
-                    {/* Open access badge */}
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         {paper.openAccess ? (
@@ -196,25 +219,23 @@ function SearchResults() {
                       </span>
                     </div>
 
-                    {/* Title */}
                     <h3 className="text-white font-semibold text-base leading-snug mb-2 group-hover:text-[#a89fff] transition-colors line-clamp-2">
                       {paper.title}
                     </h3>
 
-                    {/* Authors */}
                     {paper.authors.length > 0 && (
                       <div className="flex items-center gap-1.5 mb-3 text-white/40 text-xs">
                         <Users className="w-3 h-3 shrink-0" />
-                        <span className="line-clamp-1">{paper.authors.join(", ")}{paper.authors.length >= 3 ? " et al." : ""}</span>
+                        <span className="line-clamp-1">
+                          {paper.authors.join(", ")}{paper.authors.length >= 3 ? " et al." : ""}
+                        </span>
                       </div>
                     )}
 
-                    {/* Abstract */}
                     <p className="text-white/35 text-sm leading-relaxed line-clamp-3 mb-4">
                       {paper.abstract}
                     </p>
 
-                    {/* Topics + Journal */}
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex gap-1.5 flex-wrap">
                         {paper.topics.map(t => (
@@ -231,7 +252,6 @@ function SearchResults() {
                       )}
                     </div>
 
-                    {/* Selected indicator */}
                     {selectedPaper?.id === paper.id && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-12 bg-[#6C63FF] rounded-full" />
                     )}
@@ -249,9 +269,7 @@ function SearchResults() {
                   >
                     <ChevronLeft className="w-4 h-4" /> Prev
                   </button>
-                  <span className="text-white/30 text-sm">
-                    {page} / {totalPages}
-                  </span>
+                  <span className="text-white/30 text-sm">{page} / {totalPages}</span>
                   <button
                     onClick={() => fetchPapers(query, page + 1)}
                     disabled={page === totalPages}
@@ -263,21 +281,66 @@ function SearchResults() {
               )}
             </div>
 
-            {/* ── Right: Paper detail panel ── */}
-            <div className="lg:sticky lg:top-24 h-fit">
+            {/* ── Right: Wiki + Paper detail ── */}
+            <div className="space-y-4 lg:sticky lg:top-24 h-fit">
+
+              {/* Wiki Panel */}
+              <div className="bg-[#0a0a14] border border-[#6C63FF]/20 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-lg bg-[#6C63FF]/20 flex items-center justify-center">
+                    <Sparkles className="w-3.5 h-3.5 text-[#6C63FF]" />
+                  </div>
+                  <span className="text-white/60 text-sm font-medium">V44V Wiki</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#a89fff] border border-[#6C63FF]/20 ml-auto">
+                    AI Generated
+                  </span>
+                </div>
+
+                <h3 className="text-white font-semibold text-lg mb-3 capitalize"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  {query}
+                </h3>
+
+                {wikiLoading && (
+                  <div className="flex items-center gap-2 text-white/30 text-sm py-4">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#6C63FF]" />
+                    Generating overview...
+                  </div>
+                )}
+
+                {wikiError && (
+                  <p className="text-white/30 text-sm italic">{wikiError}</p>
+                )}
+
+                {wiki && !wikiLoading && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    {wiki.split("\n\n").filter(Boolean).map((para, i) => (
+                      <p key={i} className="text-white/55 text-sm leading-relaxed mb-3 last:mb-0">
+                        {para}
+                      </p>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Paper detail */}
               <AnimatePresence mode="wait">
                 {selectedPaper && (
                   <motion.div
                     key={selectedPaper.id}
-                    initial={{ opacity: 0, x: 16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 16 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     className="bg-[#0a0a14] border border-white/[0.06] rounded-2xl p-6"
                   >
-                    {/* Header */}
-                    <div className="mb-5 pb-5 border-b border-white/[0.06]">
-                      <div className="flex items-center gap-2 mb-3">
+                    <div className="mb-4 pb-4 border-b border-white/[0.06]">
+                      <div className="flex items-center gap-2 mb-2">
                         {selectedPaper.openAccess ? (
                           <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
                             <Unlock className="w-2.5 h-2.5" /> Open Access
@@ -291,21 +354,20 @@ function SearchResults() {
                           <span className="text-white/30 text-xs">{selectedPaper.year}</span>
                         )}
                       </div>
-                      <h2 className="text-white font-semibold text-lg leading-snug mb-3"
+                      <h2 className="text-white font-semibold text-base leading-snug mb-2"
                         style={{ fontFamily: "Georgia, serif" }}
                       >
                         {selectedPaper.title}
                       </h2>
                       {selectedPaper.authors.length > 0 && (
-                        <p className="text-[#a89fff] text-sm">
+                        <p className="text-[#a89fff] text-xs">
                           {selectedPaper.authors.join(", ")}
                           {selectedPaper.authors.length >= 3 ? " et al." : ""}
                         </p>
                       )}
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="bg-white/[0.03] rounded-xl p-3 text-center">
                         <div className="text-white font-bold text-xl">{selectedPaper.citations.toLocaleString()}</div>
                         <div className="text-white/30 text-xs mt-0.5">Citations</div>
@@ -316,29 +378,24 @@ function SearchResults() {
                       </div>
                     </div>
 
-                    {/* Journal */}
                     {selectedPaper.journal && (
-                      <div className="flex items-center gap-2 mb-5 text-sm">
+                      <div className="flex items-center gap-2 mb-4 text-sm">
                         <BookOpen className="w-4 h-4 text-white/30 shrink-0" />
-                        <span className="text-white/50">{selectedPaper.journal}</span>
+                        <span className="text-white/50 text-xs">{selectedPaper.journal}</span>
                       </div>
                     )}
 
-                    {/* Abstract */}
-                    <div className="mb-5">
+                    <div className="mb-4">
                       <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Abstract</p>
-                      <p className="text-white/55 text-sm leading-relaxed">
-                        {selectedPaper.abstract}
-                      </p>
+                      <p className="text-white/50 text-xs leading-relaxed">{selectedPaper.abstract}</p>
                     </div>
 
-                    {/* Topics */}
                     {selectedPaper.topics.length > 0 && (
-                      <div className="mb-5">
+                      <div className="mb-4">
                         <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Topics</p>
                         <div className="flex flex-wrap gap-1.5">
                           {selectedPaper.topics.map(t => (
-                            <span key={t} className="text-xs px-2.5 py-1 rounded-full bg-[#6C63FF]/10 text-[#a89fff] border border-[#6C63FF]/20">
+                            <span key={t} className="text-xs px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#a89fff] border border-[#6C63FF]/20">
                               {t}
                             </span>
                           ))}
@@ -346,7 +403,6 @@ function SearchResults() {
                       </div>
                     )}
 
-                    {/* Actions */}
                     <div className="flex flex-col gap-2">
                       {selectedPaper.doi && (
                         <a
@@ -359,7 +415,7 @@ function SearchResults() {
                         </a>
                       )}
                       <button className="flex items-center justify-center gap-2 border border-white/10 hover:border-[#6C63FF]/40 hover:bg-[#6C63FF]/5 transition-all text-white/60 hover:text-white px-4 py-2.5 rounded-xl text-sm">
-                        💬 Discuss on V44V
+                        <MessageCircle className="w-4 h-4" /> Discuss on V44V
                       </button>
                     </div>
                   </motion.div>
