@@ -39,6 +39,7 @@ function SearchResults() {
   const [wiki, setWiki] = useState("");
   const [wikiLoading, setWikiLoading] = useState(false);
   const [wikiError, setWikiError] = useState("");
+  const [wikiOpen, setWikiOpen] = useState(true);
 
   useEffect(() => {
     if (!query) return;
@@ -285,48 +286,68 @@ function SearchResults() {
             <div className="space-y-4 lg:sticky lg:top-24 h-fit">
 
               {/* Wiki Panel */}
-              <div className="bg-[#0a0a14] border border-[#6C63FF]/20 rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-6 h-6 rounded-lg bg-[#6C63FF]/20 flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5 text-[#6C63FF]" />
-                  </div>
-                  <span className="text-white/60 text-sm font-medium">V44V Wiki</span>
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#a89fff] border border-[#6C63FF]/20 ml-auto">
-                    AI Generated
-                  </span>
-                </div>
+<div className="bg-[#0a0a14] border border-[#6C63FF]/20 rounded-2xl overflow-hidden">
+  <button
+    onClick={() => setWikiOpen(w => !w)}
+    className="w-full flex items-center gap-2 p-4 hover:bg-white/[0.02] transition-colors"
+  >
+    <div className="w-6 h-6 rounded-lg bg-[#6C63FF]/20 flex items-center justify-center">
+      <Sparkles className="w-3.5 h-3.5 text-[#6C63FF]" />
+    </div>
+    <span className="text-white/60 text-sm font-medium">V44V Wiki</span>
+    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6C63FF]/10 text-[#a89fff] border border-[#6C63FF]/20">
+      AI Generated
+    </span>
+    <span className="ml-auto text-white/30 text-xs">
+      {wikiOpen ? "▲ collapse" : "▼ expand"}
+    </span>
+  </button>
 
-                <h3 className="text-white font-semibold text-lg mb-3 capitalize"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  {query}
-                </h3>
+  <AnimatePresence initial={false}>
+    {wikiOpen && (
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        <div className="px-6 pb-6">
+          <h3 className="text-white font-semibold text-lg mb-3 capitalize"
+            style={{ fontFamily: "Georgia, serif" }}
+          >
+            {query}
+          </h3>
 
-                {wikiLoading && (
-                  <div className="flex items-center gap-2 text-white/30 text-sm py-4">
-                    <Loader2 className="w-4 h-4 animate-spin text-[#6C63FF]" />
-                    Generating overview...
-                  </div>
-                )}
+          {wikiLoading && (
+            <div className="flex items-center gap-2 text-white/30 text-sm py-4">
+              <Loader2 className="w-4 h-4 animate-spin text-[#6C63FF]" />
+              Generating overview...
+            </div>
+          )}
 
-                {wikiError && (
-                  <p className="text-white/30 text-sm italic">{wikiError}</p>
-                )}
+          {wikiError && (
+            <p className="text-white/30 text-sm italic">{wikiError}</p>
+          )}
 
-                {wiki && !wikiLoading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    {wiki.split("\n\n").filter(Boolean).map((para, i) => (
-                      <p key={i} className="text-white/55 text-sm leading-relaxed mb-3 last:mb-0">
-                        {para}
-                      </p>
-                    ))}
-                  </motion.div>
-                )}
-              </div>
+          {wiki && !wikiLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              {wiki.split("\n\n").filter(Boolean).map((para, i) => (
+                <p key={i} className="text-white/55 text-sm leading-relaxed mb-3 last:mb-0">
+                  {para}
+                </p>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
 
               {/* Paper detail */}
               <AnimatePresence mode="wait">
