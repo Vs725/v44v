@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Search, ArrowRight, BookOpen, Users, Microscope, Globe, ChevronDown } from "lucide-react";
+import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 
 const FACULTIES = [
   "Science", "Humanities", "Commerce",
@@ -15,15 +16,33 @@ const SAMPLE_SEARCHES = [
   "dark matter", "linguistic relativity"
 ];
 
+function NavAuth() {
+  const { isSignedIn } = useAuth();
+  if (isSignedIn) {
+    return <UserButton afterSignOutUrl="/" />;
+  }
+  return (
+    <>
+      <SignInButton mode="modal">
+        <button className="text-sm text-white/50 hover:text-white transition-colors px-4 py-2">
+          Sign in
+        </button>
+      </SignInButton>
+      <SignUpButton mode="modal">
+        <button className="text-sm bg-[#6C63FF] hover:bg-[#7c74ff] transition-colors text-white px-4 py-2 rounded-lg font-medium">
+          Join V44V
+        </button>
+      </SignUpButton>
+    </>
+  );
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [placeholder, setPlaceholder] = useState(SAMPLE_SEARCHES[0]);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
   const [particles, setParticles] = useState<{ x: number; y: number; size: number; duration: number; delay: number }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Rotating placeholder
   useEffect(() => {
     const interval = setInterval(() => {
       setPlaceholderIndex(i => (i + 1) % SAMPLE_SEARCHES.length);
@@ -31,11 +50,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    setPlaceholder(SAMPLE_SEARCHES[placeholderIndex]);
-  }, [placeholderIndex]);
-
-  // Generate particles client-side only
   useEffect(() => {
     const generated = Array.from({ length: 24 }, () => ({
       x: Math.random() * 100,
@@ -50,23 +64,18 @@ export default function Home() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-     window.location.href = `/search?q=${encodeURIComponent(query)}`;
+      window.location.href = `/search?q=${encodeURIComponent(query)}`;
     }
   };
 
   return (
     <main className="min-h-screen bg-[#080810] text-[#e8e8e8] overflow-x-hidden font-sans relative">
 
-      {/* ── Ambient background ── */}
+      {/* Ambient background */}
       <div className="fixed inset-0 pointer-events-none">
-        {/* Deep indigo glow top-left */}
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#6C63FF] opacity-[0.07] blur-[120px]" />
-        {/* Teal glow bottom-right */}
         <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#00d4ff] opacity-[0.05] blur-[100px]" />
-        {/* Center subtle */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full bg-[#6C63FF] opacity-[0.03] blur-[80px]" />
-
-        {/* Grid */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -74,8 +83,6 @@ export default function Home() {
             backgroundSize: "64px 64px",
           }}
         />
-
-        {/* Floating particles */}
         {particles.map((p, i) => (
           <motion.div
             key={i}
@@ -87,7 +94,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ── Nav ── */}
+      {/* Nav */}
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -116,19 +123,13 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="text-sm text-white/50 hover:text-white transition-colors px-4 py-2">
-            Sign in
-          </button>
-          <button className="text-sm bg-[#6C63FF] hover:bg-[#7c74ff] transition-colors text-white px-4 py-2 rounded-lg font-medium">
-            Join V44V
-          </button>
+          <NavAuth />
         </div>
       </motion.nav>
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <section className="relative z-10 flex flex-col items-center justify-center min-h-[88vh] px-6 text-center">
 
-        {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -139,7 +140,6 @@ export default function Home() {
           Open Source · Research · Community
         </motion.div>
 
-        {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -165,7 +165,6 @@ export default function Home() {
           </h1>
         </motion.div>
 
-        {/* Subtext */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -192,10 +191,9 @@ export default function Home() {
                 ref={inputRef}
                 type="text"
                 value={query}
-                onChange={e => { setQuery(e.target.value); setIsTyping(true); }}
-                onBlur={() => setIsTyping(false)}
+                onChange={e => setQuery(e.target.value)}
                 className="flex-1 bg-transparent text-white placeholder-white/20 outline-none text-lg"
-                placeholder={`Search "${placeholder}"...`}
+                placeholder={`Search "${SAMPLE_SEARCHES[placeholderIndex]}"...`}
               />
               <button
                 type="submit"
@@ -241,9 +239,7 @@ export default function Home() {
             { value: "∞", label: "Curious Minds" },
           ].map(stat => (
             <div key={stat.label} className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-white mb-1"
-                style={{ fontFamily: "Georgia, serif" }}
-              >
+              <div className="text-2xl md:text-3xl font-bold text-white mb-1" style={{ fontFamily: "Georgia, serif" }}>
                 {stat.value}
               </div>
               <div className="text-white/30 text-xs tracking-widest uppercase">{stat.label}</div>
@@ -251,7 +247,6 @@ export default function Home() {
           ))}
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
@@ -261,7 +256,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ── How it works ── */}
+      {/* How it works */}
       <section className="relative z-10 px-6 py-32 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -271,9 +266,7 @@ export default function Home() {
           className="text-center mb-20"
         >
           <p className="text-[#6C63FF] text-xs tracking-widest uppercase mb-4">How V44V works</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-white"
-            style={{ fontFamily: "Georgia, serif" }}
-          >
+          <h2 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: "Georgia, serif" }}>
             Search. Read. Discuss.
           </h2>
         </motion.div>
@@ -313,9 +306,7 @@ export default function Home() {
                   <div className="w-12 h-12 rounded-xl bg-[#6C63FF]/10 border border-[#6C63FF]/20 flex items-center justify-center text-[#6C63FF]">
                     {card.icon}
                   </div>
-                  <span className="text-white/10 font-bold text-4xl"
-                    style={{ fontFamily: "Georgia, serif" }}
-                  >{card.step}</span>
+                  <span className="text-white/10 font-bold text-4xl" style={{ fontFamily: "Georgia, serif" }}>{card.step}</span>
                 </div>
                 <h3 className="text-white font-semibold text-xl mb-3">{card.title}</h3>
                 <p className="text-white/40 leading-relaxed text-sm">{card.desc}</p>
@@ -325,14 +316,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── For everyone ── */}
+      {/* For everyone */}
       <section className="relative z-10 px-6 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="relative rounded-3xl overflow-hidden border border-white/[0.06] bg-[#0a0a14] p-16 text-center">
             <div className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage: "radial-gradient(ellipse at 50% 0%, #6C63FF22 0%, transparent 70%)"
-              }}
+              style={{ backgroundImage: "radial-gradient(ellipse at 50% 0%, #6C63FF22 0%, transparent 70%)" }}
             />
             <div className="relative">
               <motion.div
@@ -342,9 +331,7 @@ export default function Home() {
                 transition={{ duration: 0.7 }}
               >
                 <p className="text-[#6C63FF] text-xs tracking-widest uppercase mb-6">Built for everyone</p>
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
+                <h2 className="text-4xl md:text-5xl font-bold text-white mb-6" style={{ fontFamily: "Georgia, serif" }}>
                   Research without walls
                 </h2>
                 <p className="text-white/40 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -366,7 +353,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <footer className="relative z-10 border-t border-white/[0.04] px-8 py-10 mt-16">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
