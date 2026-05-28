@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 const OPENALEX_URL = "https://api.openalex.org";
 
+function isSpam(text: string): boolean {
+  if (!text) return false;
+  const spamPatterns = [
+    /slot/i, /casino/i, /poker/i, /togel/i, /betting/i,
+    /situs/i, /gacor/i, /judi/i, /bonus/i, /jackpot/i,
+    /https?:\/\//i, /click here/i, /buy now/i,
+  ];
+  return spamPatterns.some(p => p.test(text));
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("q");
@@ -55,7 +65,7 @@ export async function GET(request: NextRequest) {
       return {
         id: work.id,
         title: work.title || "Untitled",
-        abstract: abstract.slice(0, 400) || "No abstract available.",
+        abstract: isSpam(abstract) ? "No abstract available." : abstract.slice(0, 400) || "No abstract available.",
         authors: work.authorships?.slice(0, 3).map((a: any) => a.author?.display_name).filter(Boolean) || [],
         year: work.publication_year,
         journal: work.primary_location?.source?.display_name || null,
