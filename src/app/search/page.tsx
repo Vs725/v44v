@@ -28,7 +28,7 @@ function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const router = useRouter();
-   
+
   const [papers, setPapers] = useState<Paper[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -427,16 +427,12 @@ function SearchResults() {
                     )}
 
                     <div className="flex flex-col gap-2">
-                      {selectedPaper.doi && (
-                        <a
-                          href={`https://doi.org/${selectedPaper.doi.replace("https://doi.org/", "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 bg-[#6C63FF] hover:bg-[#7c74ff] transition-colors text-white px-4 py-2.5 rounded-xl text-sm font-medium"
-                        >
-                          <ExternalLink className="w-4 h-4" /> View Paper
-                        </a>
-                      )}
+                      <button
+  onClick={() => router.push(`/paper?title=${encodeURIComponent(selectedPaper.title)}&doi=${encodeURIComponent(selectedPaper.doi || "")}`)}
+  className="flex items-center justify-center gap-2 bg-[#6C63FF] hover:bg-[#7c74ff] transition-colors text-white px-4 py-2.5 rounded-xl text-sm font-medium"
+>
+  <ExternalLink className="w-4 h-4" /> View Paper
+</button>
                       <button
   onClick={() => router.push(`/discussion?topic=${encodeURIComponent(selectedPaper?.title || "")}&title=${encodeURIComponent(selectedPaper?.title || "")}`)}
   className="flex items-center justify-center gap-2 border border-white/10 hover:border-[#6C63FF]/40 hover:bg-[#6C63FF]/5 transition-all text-white/60 hover:text-white px-4 py-2.5 rounded-xl text-sm"
