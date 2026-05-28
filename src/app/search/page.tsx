@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +27,8 @@ interface Paper {
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
-
+  const router = useRouter();
+   
   const [papers, setPapers] = useState<Paper[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -435,9 +437,12 @@ function SearchResults() {
                           <ExternalLink className="w-4 h-4" /> View Paper
                         </a>
                       )}
-                      <button className="flex items-center justify-center gap-2 border border-white/10 hover:border-[#6C63FF]/40 hover:bg-[#6C63FF]/5 transition-all text-white/60 hover:text-white px-4 py-2.5 rounded-xl text-sm">
-                        <MessageCircle className="w-4 h-4" /> Discuss on V44V
-                      </button>
+                      <button
+  onClick={() => router.push(`/discussion?topic=${encodeURIComponent(selectedPaper?.title || "")}&title=${encodeURIComponent(selectedPaper?.title || "")}`)}
+  className="flex items-center justify-center gap-2 border border-white/10 hover:border-[#6C63FF]/40 hover:bg-[#6C63FF]/5 transition-all text-white/60 hover:text-white px-4 py-2.5 rounded-xl text-sm"
+>
+  <MessageCircle className="w-4 h-4" /> Discuss on V44V
+</button>
                     </div>
                   </motion.div>
                 )}
