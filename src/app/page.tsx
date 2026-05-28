@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, BookOpen, Users, Microscope, Globe, ChevronDown } from "lucide-react";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 const FACULTIES = [
   "Science", "Humanities", "Commerce",
@@ -38,6 +39,18 @@ function NavAuth() {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
+
+useEffect(() => {
+  if (isSignedIn) {
+    const onboarded = localStorage.getItem("v44v_onboarded");
+    if (!onboarded) {
+      router.push("/onboarding");
+    }
+  }
+}, [isSignedIn]);
+
   const [query, setQuery] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [particles, setParticles] = useState<{ x: number; y: number; size: number; duration: number; delay: number }[]>([]);
@@ -60,6 +73,16 @@ export default function Home() {
     }));
     setParticles(generated);
   }, []);
+
+   useEffect(() => {
+  if (isSignedIn) {
+    const onboarded = localStorage.getItem("v44v_onboarded");
+    if (!onboarded) {
+      router.push("/onboarding");
+    }
+  }
+}, [isSignedIn]);
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
