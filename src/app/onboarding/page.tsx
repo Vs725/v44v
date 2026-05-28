@@ -87,12 +87,12 @@ export default function OnboardingPage() {
     localStorage.setItem("v44v_branch", selectedBranch || "");
     localStorage.setItem("v44v_niches", JSON.stringify(selectedNiches));
     localStorage.setItem("v44v_onboarded", "true");
-    router.push("/");
+    router.push("/dashboard");
   };
 
   const handleSkip = () => {
     localStorage.setItem("v44v_onboarded", "skipped");
-    router.push("/");
+    router.push("/dashboard");
   };
 
   const steps = ["Faculty", "Branch", "Niche"];

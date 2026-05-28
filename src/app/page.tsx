@@ -79,6 +79,8 @@ useEffect(() => {
     const onboarded = localStorage.getItem("v44v_onboarded");
     if (!onboarded) {
       router.push("/onboarding");
+    } else {
+      router.push("/dashboard");
     }
   }
 }, [isSignedIn]);
