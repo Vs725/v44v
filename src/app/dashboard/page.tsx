@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, ArrowRight, BookOpen, Users, Quote, Calendar, Unlock, Lock, Sparkles, LogOut, Settings, ChevronRight, Flame, Clock } from "lucide-react";
+import { Search, ArrowRight, BookOpen, Users, Quote, Calendar, Unlock, Lock, Sparkles, LogOut, Settings, ChevronRight, Flame, Clock, PenSquare } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -122,6 +122,11 @@ export default function Dashboard() {
 
           {/* Nav links */}
           <div className="hidden md:flex items-center gap-6 text-sm text-white/30">
+            
+            <button onClick={() => router.push("/posts")} className="hover:text-white/60 transition-colors flex items-center gap-1">
+              <PenSquare className="w-3.5 h-3.5" /> Posts
+            </button>
+
             <button onClick={() => router.push("/onboarding")} className="hover:text-white/60 transition-colors flex items-center gap-1">
               <Settings className="w-3.5 h-3.5" /> Preferences
             </button>
