@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight, BookOpen, Users, Quote, Calendar, Unlock, Lock, Sparkles, LogOut, Settings, ChevronRight, Flame, Clock, PenSquare } from "lucide-react";
-import { useAuth, UserButton } from "@clerk/nextjs";
+import { useAuth, UserButton, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 interface Paper {
@@ -22,6 +22,7 @@ interface Paper {
 export default function Dashboard() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
+  const { user } = useUser(); 
 
   const [papers, setPapers] = useState<Paper[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,11 +135,17 @@ export default function Dashboard() {
             <button onClick={() => router.push("/spaces")} className="hover:text-white/60 transition-colors flex items-center gap-1">
               <BookOpen className="w-3.5 h-3.5" /> Spaces
             </button>
-
-
           </div>
 
-          <UserButton afterSignOutUrl="/" />
+  <div className="flex items-center gap-3">
+   <button
+    onClick={() => router.push(`/profile/${user?.username || user?.firstName || "me"}`)}
+    className="text-white/40 hover:text-white transition-colors text-sm"
+  >
+    My Profile
+     </button>
+     <UserButton afterSignOutUrl="/" />
+  </div>
         </div>
       </nav>
 
