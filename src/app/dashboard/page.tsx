@@ -104,8 +104,15 @@ export default function Dashboard() {
             <span className="font-bold text-white hidden sm:block">V44V</span>
           </a>
 
+          <button
+          onClick={() => router.push("/search?q=")}
+          className="sm:hidden text-white/40 hover:text-white transition-colors"
+          >
+          <Search className="w-5 h-5" />
+          </button>
+
           {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-xl">
+          <form onSubmit={handleSearch} className="flex-1 max-w-xl hidden sm:block">
             <div className="relative flex items-center bg-[#0f0f1a] border border-white/10 focus-within:border-[#6C63FF]/50 rounded-xl px-4 py-2.5 transition-all">
               <Search className="w-4 h-4 text-white/30 mr-3 shrink-0" />
               <input
