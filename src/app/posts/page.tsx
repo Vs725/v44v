@@ -1,11 +1,15 @@
 "use client";
 
+import { useState as useLocalState } from "react";
+import { MessageCircle, Send, ChevronDown, ChevronUp as ChevronUpIcon } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, PenSquare, ChevronUp, Clock, Tag, Users, Loader2, Filter } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { getGun } from "@/lib/gun";
+
 
 interface Post {
   id: string;
@@ -177,7 +181,8 @@ export default function PostsPage() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
-                  className="group bg-[#0a0a12] border border-white/[0.05] hover:border-white/15 rounded-2xl p-6 transition-all duration-300"
+                  onClick={() => router.push(`/post/${post.id}`)}
+                  className="group bg-[#0a0a12] border border-white/[0.05] hover:border-white/15 rounded-2xl p-6 transition-all duration-300 cursor-pointer"
                 >
                   <div className="flex items-start gap-4">
 
