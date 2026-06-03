@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description: "A federated research discussion platform for researchers and enthusiasts.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 export default function RootLayout({
   children,
 }: Readonly<{
