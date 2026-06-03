@@ -130,6 +130,12 @@ export default function Dashboard() {
             <button onClick={() => router.push("/onboarding")} className="hover:text-white/60 transition-colors flex items-center gap-1">
               <Settings className="w-3.5 h-3.5" /> Preferences
             </button>
+
+            <button onClick={() => router.push("/spaces")} className="hover:text-white/60 transition-colors flex items-center gap-1">
+              <BookOpen className="w-3.5 h-3.5" /> Spaces
+            </button>
+
+
           </div>
 
           <UserButton afterSignOutUrl="/" />

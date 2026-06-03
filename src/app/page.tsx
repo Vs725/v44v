@@ -143,7 +143,7 @@ useEffect(() => {
 
         <div className="hidden md:flex items-center gap-8 text-sm text-white/40">
           <a href="#" className="hover:text-white/80 transition-colors">Explore</a>
-          <a href="#" className="hover:text-white/80 transition-colors">Spaces</a>
+         <a href="/spaces" className="hover:text-white/80 transition-colors">Spaces</a>
           <a href="#" className="hover:text-white/80 transition-colors">About</a>
         </div>
 
