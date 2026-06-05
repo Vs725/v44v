@@ -1,11 +1,11 @@
-import Gun from "gun";
-import "gun/sea";
-
-let gun: any;
+let gun: any = null;
 
 export function getGun() {
   if (typeof window === "undefined") return null;
+  
   if (!gun) {
+    const Gun = require("gun");
+    require("gun/sea");
     gun = Gun({
       peers: [
         "https://gun-us.herokuapp.com/gun",

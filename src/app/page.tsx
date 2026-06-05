@@ -20,7 +20,7 @@ const SAMPLE_SEARCHES = [
 function NavAuth() {
   const { isSignedIn } = useAuth();
   if (isSignedIn) {
-    return <UserButton afterSignOutUrl="/" />;
+    return <UserButton />;
   }
   return (
     <>

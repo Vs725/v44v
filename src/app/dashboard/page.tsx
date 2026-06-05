@@ -151,7 +151,7 @@ export default function Dashboard() {
   >
     My Profile
      </button>
-     <UserButton afterSignOutUrl="/" />
+     <UserButton />
   </div>
         </div>
       </nav>
@@ -305,7 +305,7 @@ export default function Dashboard() {
             {/* Profile card */}
             <div className="bg-[#0a0a14] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-4">
-                <UserButton afterSignOutUrl="/" />
+                <UserButton />
                 <div>
                   <p className="text-white text-sm font-medium">Your Profile</p>
                   <p className="text-white/30 text-xs">V44V Member</p>
