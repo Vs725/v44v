@@ -182,7 +182,7 @@ function SearchResults() {
 
         {/* Results */}
         {!loading && !error && papers.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:items-start">
 
             {/* ── Left: Papers ── */}
             <div className="space-y-4">
@@ -285,7 +285,7 @@ function SearchResults() {
             </div>
 
             {/* ── Right: Wiki + Paper detail ── */}
-            <div className="space-y-4 lg:sticky lg:top-24 h-fit">
+            <div className="space-y-4 lg:sticky lg:top-24 h-fit order-first lg:order-last">
 
               {/* Wiki Panel */}
 <div className="bg-[#0a0a14] border border-[#6C63FF]/20 rounded-2xl overflow-hidden">
